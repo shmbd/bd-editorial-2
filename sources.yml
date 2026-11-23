@@ -1,0 +1,1136 @@
+# BD Editorials - Complete 26 Newspaper Source Configuration (Phase 2)
+# কোড পরিবর্তন না করেই নতুন পত্রিকা যোগ করতে নিচের কাঠামো অনুসরণ করুন।
+# নোট: bdnews24 বাংলা (bdnews24-bn) এবং English (bdnews24-en) দুটি সম্পূর্ণ আলাদা সোর্স।
+
+sources:
+  # =====================================================================
+  # বাংলা পত্রিকাসমূহ (Bangla Sources - 17)
+  # =====================================================================
+  - id: prothom-alo
+    name_bn: "প্রথম আলো"
+    name_en: "Prothom Alo"
+    language: bn
+    enabled: true
+    logo: "assets/logos/prothom-alo.svg"
+    website: "https://www.prothomalo.com"
+    section_url: "https://www.prothomalo.com/opinion"
+    fetch_method: html
+    parser: prothom_alo
+    default_category: opinion
+    min_articles: 5
+    max_articles: 12
+    selectors:
+      ssr_script: "script#static-page"
+      item_link: "a[href*='/opinion/']"
+      title: "meta[property='og:title'], h1"
+      author: "meta[name='author']"
+      published_at: "meta[property='article:published_time']"
+      body: "div.story-element-text p, article p"
+    notes: "Official /stories.rss is general news; /opinion uses Quintype SSR JSON in script#static-page (verified, allowed by robots.txt)."
+
+  - id: kaler-kantho
+    name_bn: "কালের কণ্ঠ"
+    name_en: "Kaler Kantho"
+    language: bn
+    enabled: false
+    disabled_reason: "Blocked by Cloudflare anti-bot challenge (HTTP 403, cf-mitigated: challenge) on site and /rss.xml."
+    logo: "assets/logos/kaler-kantho.svg"
+    website: "https://www.kalerkantho.com"
+    section_url: "https://www.kalerkantho.com/print-edition/sub-editorial"
+    fetch_method: html
+    parser: generic
+    default_category: op-ed
+    min_articles: 3
+    max_articles: 10
+    selectors:
+      item_link: "a[href*='/sub-editorial/'], a[href*='/editorial/']"
+      body: "article p"
+
+  - id: jugantor
+    name_bn: "যুগান্তর"
+    name_en: "Jugantor"
+    language: bn
+    enabled: true
+    skip_detail_fetch: true
+    logo: "assets/logos/jugantor.svg"
+    website: "https://www.jugantor.com"
+    section_url: "https://www.jugantor.com/viewers-opinion"
+    rss_urls:
+      - url: "https://www.jugantor.com/news_sitemap.xml"
+        category: opinion
+    fetch_method: rss
+    parser: generic
+    default_category: opinion
+    min_articles: 2
+    max_articles: 10
+    selectors:
+      url_pattern: "jugantor\\.com/(viewers-opinion|todays-paper/editorial|todays-paper/sub-editorial)/\\d+"
+      body: "article p"
+    notes: "HTML pages have Cloudflare JS challenge (HTTP 403), so indexed ethically via Jugantor's official robots.txt Google News XML feed (news_sitemap.xml)."
+
+  - id: samakal
+    name_bn: "সমকাল"
+    name_en: "Samakal"
+    language: bn
+    enabled: true
+    logo: "assets/logos/samakal.svg"
+    website: "https://samakal.com"
+    section_url: "https://samakal.com/opinion"
+    listing_urls:
+      - url: "https://samakal.com/opinion"
+        category: opinion
+      - url: "https://samakal.com/editorial"
+        category: editorial
+    fetch_method: html
+    parser: generic
+    default_category: opinion
+    min_articles: 5
+    max_articles: 12
+    selectors:
+      item_link: ".DCatLead a[href*='/article/'], .Catcards a[href*='/article/']"
+      url_pattern: "/(opinion|editorial)/article/\\d+"
+      title: "meta[property='og:title'], h1"
+      author: "div.writter p, div.writter"
+      published_at: "div.dateAndTime"
+      body: "div.dNewsDesc p"
+    notes: "No XML RSS; verified HTML listing & detail selectors (allowed by robots.txt)."
+
+  - id: ittefaq
+    name_bn: "দৈনিক ইত্তেফাক"
+    name_en: "The Daily Ittefaq"
+    language: bn
+    enabled: true
+    logo: "assets/logos/ittefaq.svg"
+    website: "https://www.ittefaq.com.bd"
+    section_url: "https://www.ittefaq.com.bd/opinion"
+    rss_urls:
+      - url: "https://www.ittefaq.com.bd/feed/opinion"
+        category: opinion
+    fetch_method: rss
+    parser: generic
+    default_category: opinion
+    min_articles: 5
+    max_articles: 12
+    selectors:
+      author: "div.each_author a.name, div.author, meta[name='author']"
+      published_at: "meta[property='article:published_time'], time"
+      body: "div.jw_article_body p"
+    notes: "Official RSS feed /feed/opinion discovered via <link rel='alternate'> (verified, allowed by robots.txt)."
+
+  - id: bd-pratidin
+    name_bn: "বাংলাদেশ প্রতিদিন"
+    name_en: "Bangladesh Pratidin"
+    language: bn
+    enabled: true
+    skip_detail_fetch: true
+    logo: "assets/logos/bd-pratidin.svg"
+    website: "https://www.bd-pratidin.com"
+    section_url: "https://www.bd-pratidin.com/editorial"
+    rss_urls:
+      - url: "https://www.bd-pratidin.com/rss.xml"
+        category: editorial
+    fetch_method: rss
+    parser: generic
+    default_category: editorial
+    min_articles: 2
+    max_articles: 10
+    selectors:
+      url_pattern: "bd-pratidin\\.com/editorial/\\d{4}/"
+      body: "article p"
+    notes: "HTML pages trigger intermittent Cloudflare 403, so indexed ethically via official /rss.xml filtered to /editorial/ entries."
+
+  - id: naya-diganta
+    name_bn: "নয়া দিগন্ত"
+    name_en: "Daily Naya Diganta"
+    language: bn
+    enabled: true
+    logo: "assets/logos/naya-diganta.svg"
+    website: "https://dailynayadiganta.com"
+    section_url: "https://dailynayadiganta.com/category/editorial/52"
+    listing_urls:
+      - url: "https://dailynayadiganta.com/category/editorial/52"
+        category: editorial
+      - url: "https://dailynayadiganta.com/category/op-ed/53"
+        category: op-ed
+      - url: "https://dailynayadiganta.com/category/opinion/14"
+        category: opinion
+    fetch_method: html
+    parser: generic
+    default_category: opinion
+    min_articles: 4
+    max_articles: 12
+    selectors:
+      item_link: "a[href*='/post/editorial/'], a[href*='/post/op-ed/'], a[href*='/post/opinion/']"
+      url_pattern: "/post/(editorial|op-ed|opinion)/\\d+"
+      title: "meta[property='og:title'], h1"
+      author: ".pd-byline-left > span:first-child, .author-name"
+      published_at: "time, .pd-byline-left"
+      body: "article.pd-body p"
+    notes: "Bare domain dailynayadiganta.com has valid TLS cert; scrapes dedicated সম্পাদকীয় (52), উপ-সম্পাদকীয় (53), and মতামত (14) category pages."
+
+  - id: manabzamin
+    name_bn: "মানবজমিন"
+    name_en: "Daily Manab Zamin"
+    language: bn
+    enabled: true
+    logo: "assets/logos/manabzamin.svg"
+    website: "https://www.mzamin.com"
+    section_url: "https://www.mzamin.com/category/%E0%A6%AE%E0%A6%A4-%E0%A6%AE%E0%A6%A4%E0%A6%BE%E0%A6%A8%E0%A7%8D%E0%A6%A4%E0%A6%B0"
+    listing_urls:
+      - url: "https://www.mzamin.com/category/%E0%A6%AE%E0%A6%A4-%E0%A6%AE%E0%A6%A4%E0%A6%BE%E0%A6%A8%E0%A7%8D%E0%A6%A4%E0%A6%B0"
+        category: opinion
+      - url: "https://www.mzamin.com/category/%E0%A6%AA%E0%A7%8D%E0%A6%B0%E0%A6%AC%E0%A6%A8%E0%A7%8D%E0%A6%A7"
+        category: column
+    fetch_method: html
+    parser: generic
+    default_category: opinion
+    min_articles: 4
+    max_articles: 10
+    selectors:
+      item_link: "h2 a[href*='/article/'], h3 a[href*='/article/'], a[href*='/article/']"
+      url_pattern: "/article/\\d+"
+      title: "meta[property='og:title'], h1"
+      author: "span.font-medium, .author-name"
+      published_at: "meta[property='article:published_time'], time"
+      body: "div.prose p, article p"
+    notes: "Scrapes মত-মতান্তর and প্রবন্ধ sections on mzamin.com (verified, allowed by robots.txt)."
+
+  - id: janakantha
+    name_bn: "জনকণ্ঠ"
+    name_en: "Daily Janakantha"
+    language: bn
+    enabled: true
+    logo: "assets/logos/janakantha.svg"
+    website: "https://www.dailyjanakantha.com"
+    section_url: "https://www.dailyjanakantha.com/opinion"
+    listing_urls:
+      - url: "https://www.dailyjanakantha.com/opinion"
+        category: opinion
+    fetch_method: html
+    parser: generic
+    default_category: opinion
+    min_articles: 4
+    max_articles: 10
+    selectors:
+      item_link: ".DCatTopNews a[href*='/opinion/news/'], .DCatTopNewsList a[href*='/opinion/news/'], a[href*='/opinion/news/']"
+      url_pattern: "/opinion/news/\\d+"
+      title: "meta[property='og:title'], h1"
+      author: ".writter, .author-name"
+      published_at: "meta[property='article:published_time'], p.date"
+      body: "div.DDetailsContent p, article p, main p, div p"
+    notes: "No RSS (/rss.xml is 404); verified HTML selectors on /opinion (allowed by robots.txt)."
+
+  - id: amader-shomoy
+    name_bn: "আমাদের সময়"
+    name_en: "Dainik Amader Shomoy"
+    language: bn
+    enabled: false
+    disabled_reason: "Client-rendered Nuxt SPA (__NUXT__) with zero SSR article links in HTML; API host (/api.dainikamadershomoy.com/) is disallowed in robots.txt."
+    logo: "assets/logos/amader-shomoy.svg"
+    website: "https://www.dainikamadershomoy.com"
+    section_url: "https://www.dainikamadershomoy.com/category/all/opinion"
+    fetch_method: html
+    parser: generic
+    default_category: opinion
+    min_articles: 3
+    max_articles: 10
+    selectors:
+      item_link: "a[href*='/opinion/']"
+      body: "article p"
+
+  - id: dhaka-post
+    name_bn: "ঢাকা পোস্ট"
+    name_en: "Dhaka Post"
+    language: bn
+    enabled: true
+    logo: "assets/logos/dhaka-post.svg"
+    website: "https://www.dhakapost.com"
+    section_url: "https://www.dhakapost.com/opinion"
+    listing_urls:
+      - url: "https://www.dhakapost.com/opinion"
+        category: opinion
+    fetch_method: html
+    parser: generic
+    default_category: opinion
+    min_articles: 4
+    max_articles: 10
+    selectors:
+      item_link: "a[href*='/opinion/']"
+      url_pattern: "/opinion/\\d+"
+      title: "meta[property='og:title'], h1"
+      author: "meta[name='author']"
+      published_at: "meta[property='article:published_time'], time[datetime]"
+      body: "div.news-details p, article p, main p"
+    notes: "Verified HTML selectors & meta tags on /opinion (allowed by robots.txt)."
+
+  - id: bonik-barta
+    name_bn: "বণিক বার্তা"
+    name_en: "Bonik Barta"
+    language: bn
+    enabled: true
+    logo: "assets/logos/bonik-barta.svg"
+    website: "https://bonikbarta.com"
+    section_url: "https://bonikbarta.com/editorial"
+    listing_urls:
+      - url: "https://bonikbarta.com/editorial"
+        category: editorial
+    fetch_method: html
+    parser: generic
+    default_category: editorial
+    min_articles: 4
+    max_articles: 10
+    selectors:
+      item_link: "h3 a[href*='/editorial/'], a[href*='/editorial/']"
+      url_pattern: "/editorial/[A-Za-z0-9]{10,}"
+      title: "meta[property='og:title'], h1"
+      author: "a[href*='/author/'], meta[name='author']"
+      published_at: "meta[property='article:published_time'], time"
+      body: "div.prose p, article p"
+    notes: "No XML RSS; /editorial includes editorials & policy op-eds with div.prose p body (verified, allowed by robots.txt)."
+
+  - id: sangbad
+    name_bn: "সংবাদ"
+    name_en: "Daily Sangbad"
+    language: bn
+    enabled: true
+    logo: "assets/logos/sangbad.svg"
+    website: "https://sangbad.net"
+    section_url: "https://sangbad.net/opinion/"
+    listing_urls:
+      - url: "https://sangbad.net/opinion/"
+        category: opinion
+      - url: "https://sangbad.net/editorial/"
+        category: editorial
+    fetch_method: html
+    parser: generic
+    default_category: opinion
+    min_articles: 4
+    max_articles: 10
+    selectors:
+      item_link: "a.prothom-songbad-post-style"
+      url_pattern: "/news/\\d+"
+      title: "meta[property='og:title'], h1"
+      author: ".author-name, meta[name='author']"
+      published_at: "span.news-time, time"
+      body: "div.story-details p"
+    notes: "sangbad.net.bd redirects to sangbad.net; verified main grid selector a.prothom-songbad-post-style to exclude sidebar general news."
+
+  - id: inqilab
+    name_bn: "দৈনিক ইনকিলাব"
+    name_en: "Daily Inqilab"
+    language: bn
+    enabled: true
+    logo: "assets/logos/inqilab.svg"
+    website: "https://dailyinqilab.com"
+    section_url: "https://dailyinqilab.com/editorial"
+    listing_urls:
+      - url: "https://dailyinqilab.com/editorial"
+        category: editorial
+    fetch_method: html
+    parser: generic
+    default_category: editorial
+    min_articles: 4
+    max_articles: 10
+    selectors:
+      item_link: "a[href*='/editorial/article/'], a[href*='/editorial/news/']"
+      url_pattern: "/editorial/(article|news)/\\d+"
+      title: "meta[property='og:title'], h1"
+      author: ".author-name, meta[name='author']"
+      published_at: "meta[property='article:published_time'], time"
+      body: "div.description p"
+    notes: "No RSS (/rss.xml is 404); verified /editorial HTML selectors and div.description p body (allowed by robots.txt)."
+
+  - id: jago-news-24
+    name_bn: "জাগো নিউজ ২৪"
+    name_en: "Jago News 24"
+    language: bn
+    enabled: false
+    disabled_reason: "Blocked by Cloudflare anti-bot challenge (HTTP 403, cf-mitigated: challenge) on /opinion, /rss/opinion.xml, and article pages."
+    logo: "assets/logos/jago-news-24.svg"
+    website: "https://www.jagonews24.com"
+    section_url: "https://www.jagonews24.com/opinion"
+    fetch_method: html
+    parser: generic
+    default_category: opinion
+    min_articles: 3
+    max_articles: 10
+    selectors:
+      item_link: "a[href*='/opinion/']"
+      body: "article p"
+
+  - id: bangla-tribune
+    name_bn: "বাংলা ট্রিবিউন"
+    name_en: "Bangla Tribune"
+    language: bn
+    enabled: true
+    logo: "assets/logos/bangla-tribune.svg"
+    website: "https://www.banglatribune.com"
+    section_url: "https://www.banglatribune.com/columns"
+    rss_urls:
+      - url: "https://www.banglatribune.com/feed/columns"
+        category: column
+      - url: "https://www.banglatribune.com/feed/others/opinion"
+        category: opinion
+    fetch_method: rss
+    parser: generic
+    default_category: column
+    min_articles: 5
+    max_articles: 12
+    selectors:
+      author: "div.each_author a.name, div.author, meta[name='author']"
+      published_at: "meta[property='article:published_time'], time"
+      body: "div.jw_article_body p"
+    notes: "Official RSS feeds /feed/columns and /feed/others/opinion with author & tags (verified, allowed by robots.txt)."
+
+  - id: bdnews24-bn
+    name_bn: "বিডিনিউজ২৪ বাংলা"
+    name_en: "bdnews24 Bangla"
+    language: bn
+    enabled: true
+    logo: "assets/logos/bdnews24-bn.svg"
+    website: "https://bangla.bdnews24.com"
+    section_url: "https://bangla.bdnews24.com/opinion"
+    listing_urls:
+      - url: "https://bangla.bdnews24.com/opinion"
+        category: opinion
+    fetch_method: html
+    parser: generic
+    default_category: opinion
+    min_articles: 4
+    max_articles: 12
+    selectors:
+      item_link: ".Cat-lead-wrapper a[href*='/opinion/'], .Cat-list a[href*='/opinion/'], a[href*='/opinion/']"
+      url_pattern: "bangla\\.bdnews24\\.com/opinion/[a-z0-9]{10}$"
+      title: "meta[property='og:title'], h1"
+      author: ".detail-author-name a, .detail-author-name span.author"
+      published_at: "meta[property='article:published_time'], time"
+      body: "div.details-brief p"
+    notes: "Separate Bangla source (id: bdnews24-bn); /rss.xml returns HTML so verified HTML selectors on bangla.bdnews24.com/opinion (allowed by robots.txt)."
+
+  # =====================================================================
+  # English Sources (9)
+  # =====================================================================
+  - id: daily-star
+    name_bn: "দ্য ডেইলি স্টার"
+    name_en: "The Daily Star"
+    language: en
+    enabled: true
+    logo: "assets/logos/daily-star.svg"
+    website: "https://www.thedailystar.net"
+    section_url: "https://www.thedailystar.net/opinion"
+    rss_urls:
+      - url: "https://www.thedailystar.net/opinion/rss.xml"
+        category: opinion
+      - url: "https://www.thedailystar.net/opinion/editorial/rss.xml"
+        category: editorial
+      - url: "https://www.thedailystar.net/opinion/views/rss.xml"
+        category: op-ed
+    fetch_method: rss
+    parser: generic
+    default_category: opinion
+    min_articles: 5
+    max_articles: 12
+    selectors:
+      author: ".block-author-info-block a[href*='/author/'], a[href*='/author/']"
+      published_at: "meta[property='article:published_time'], time"
+      body: "span.text-formatted p, article p"
+    notes: "Official Drupal RSS feeds for Opinion, Editorial, and Views (verified, allowed by robots.txt)."
+
+  - id: dhaka-tribune
+    name_bn: "ঢাকা ট্রিবিউন"
+    name_en: "Dhaka Tribune"
+    language: en
+    enabled: true
+    logo: "assets/logos/dhaka-tribune.svg"
+    website: "https://www.dhakatribune.com"
+    section_url: "https://www.dhakatribune.com/opinion"
+    rss_urls:
+      - url: "https://www.dhakatribune.com/feed/opinion"
+        category: op-ed
+    fetch_method: rss
+    parser: generic
+    default_category: op-ed
+    min_articles: 5
+    max_articles: 12
+    selectors:
+      author: "div.each_author a.name, div.author, meta[name='author']"
+      published_at: "meta[property='article:published_time'], time"
+      body: "div.jw_article_body p"
+    notes: "Official RSS feed /feed/opinion covering Op-Ed, Editorial, and Longform (verified, allowed by robots.txt)."
+
+  - id: new-age
+    name_bn: "নিউ এজ"
+    name_en: "New Age"
+    language: en
+    enabled: true
+    logo: "assets/logos/new-age.svg"
+    website: "https://www.newagebd.net"
+    section_url: "https://www.newagebd.net/articlelist/25/editorial"
+    listing_urls:
+      - url: "https://www.newagebd.net/articlelist/55/Editorial"
+        category: editorial
+      - url: "https://www.newagebd.net/articlelist/54/Opinion"
+        category: opinion
+    fetch_method: html
+    parser: generic
+    default_category: opinion
+    min_articles: 4
+    max_articles: 12
+    selectors:
+      item_link: "h3 a[href*='/post/'], a[href*='/post/opinion/'], a[href*='/post/editorial/']"
+      url_pattern: "/post/(opinion|editorial)/\\d+"
+      title: "meta[property='og:title'], h1"
+      author: "a.d-inline-flex.align-items-center.text-decoration-none, a[href*='/author/']"
+      published_at: "time"
+      body: "div.post-content p"
+    notes: "Scrapes dedicated Editorial (55) & Opinion (54) lists; reads visible <time> text instead of hardcoded template datetime='2026-07-06'."
+
+  - id: tbs
+    name_bn: "দ্য বিজনেস স্ট্যান্ডার্ড"
+    name_en: "The Business Standard"
+    language: en
+    enabled: true
+    logo: "assets/logos/tbs.svg"
+    website: "https://www.tbsnews.net"
+    section_url: "https://www.tbsnews.net/thoughts"
+    rss_urls:
+      - url: "https://www.tbsnews.net/thoughts/rss.xml"
+        category: opinion
+    fetch_method: rss
+    parser: generic
+    default_category: opinion
+    min_articles: 5
+    max_articles: 12
+    selectors:
+      author: "div.author-name a, div.author-name"
+      published_at: "meta[property='article:published_time'], time"
+      body: "div.section-content p"
+    notes: "Official RSS feed /thoughts/rss.xml for TBS Thoughts/Opinion section (verified, allowed by robots.txt)."
+
+  - id: financial-express
+    name_bn: "দ্য ফাইন্যান্সিয়াল এক্সপ্রেস"
+    name_en: "The Financial Express"
+    language: en
+    enabled: true
+    logo: "assets/logos/financial-express.svg"
+    website: "https://thefinancialexpress.com.bd"
+    section_url: "https://thefinancialexpress.com.bd/category/views/views"
+    listing_urls:
+      - url: "https://thefinancialexpress.com.bd/category/views/views"
+        category: opinion
+      - url: "https://thefinancialexpress.com.bd/category/editorial"
+        category: editorial
+      - url: "https://thefinancialexpress.com.bd/category/views/columns"
+        category: column
+      - url: "https://thefinancialexpress.com.bd/category/views/opinions"
+        category: op-ed
+    fetch_method: html
+    parser: generic
+    default_category: opinion
+    min_articles: 4
+    max_articles: 12
+    selectors:
+      item_link: "h2 a[href], h3 a[href]"
+      url_pattern: "thefinancialexpress\\.com\\.bd/(views|editorial|columns|opinions)/[a-z0-9\\-]+"
+      title: "meta[property='og:title'], h1"
+      author: "a[href*='/author/'], [class*='author']"
+      published_at: "meta[property='article:published_time'], time"
+      body: "article p, div.container p"
+    notes: "/feed returns 404; verified HTML category pages for Editorial, Views, Columns, and Opinions (allowed by robots.txt)."
+
+  - id: daily-sun
+    name_bn: "ডেইলি সান"
+    name_en: "Daily Sun"
+    language: en
+    enabled: false
+    disabled_reason: "Blocked by Cloudflare anti-bot challenge (HTTP 403, cf-mitigated: challenge) on /opinion, /printversion/type/editorial, and /rss.xml."
+    logo: "assets/logos/daily-sun.svg"
+    website: "https://www.daily-sun.com"
+    section_url: "https://www.daily-sun.com/opinion"
+    fetch_method: html
+    parser: generic
+    default_category: opinion
+    min_articles: 3
+    max_articles: 10
+    selectors:
+      item_link: "a[href*='/opinion/']"
+      body: "article p"
+
+  - id: the-independent
+    name_bn: "দ্য ইন্ডিপেন্ডেন্ট"
+    name_en: "The Independent"
+    language: en
+    enabled: false
+    disabled_reason: "Website unreachable / ceased online publication (HTTPS connection to theindependentbd.com timed out)."
+    logo: "assets/logos/the-independent.svg"
+    website: "https://www.theindependentbd.com"
+    section_url: "https://www.theindependentbd.com/arcprint/editorial"
+    fetch_method: html
+    parser: generic
+    default_category: editorial
+    min_articles: 1
+    max_articles: 5
+    selectors:
+      item_link: "a[href*='post']"
+      body: "article p"
+
+  - id: daily-observer
+    name_bn: "দ্য ডেইলি অবজারভার"
+    name_en: "The Daily Observer"
+    language: en
+    enabled: true
+    logo: "assets/logos/daily-observer.svg"
+    website: "https://www.observerbd.com"
+    section_url: "https://www.observerbd.com/menu/246"
+    listing_urls:
+      - url: "https://www.observerbd.com/menu/246"
+        category: opinion
+      - url: "https://www.observerbd.com/menu/199"
+        category: editorial
+    fetch_method: html
+    parser: generic
+    default_category: opinion
+    min_articles: 3
+    max_articles: 10
+    selectors:
+      item_link: "div.title_inner a[href*='news/']"
+      url_pattern: "observerbd\\.com/news/\\d+"
+      title: "meta[property='og:title'], h1"
+      author: ".writer, meta[name='author']"
+      published_at: "div.pub"
+      body: "div.mood"
+    notes: "No RSS (/rss.xml is 404); verified menu/246 (Opinion) & menu/199 (Editorial) using div.title_inner links and <br>-delimited div.mood body."
+
+  - id: bdnews24-en
+    name_bn: "বিডিনিউজ২৪ ইংলিশ"
+    name_en: "bdnews24 English"
+    language: en
+    enabled: true
+    logo: "assets/logos/bdnews24-en.svg"
+    website: "https://bdnews24.com"
+    section_url: "https://bdnews24.com/opinion"
+    listing_urls:
+      - url: "https://bdnews24.com/opinion"
+        category: opinion
+    fetch_method: html
+    parser: generic
+    default_category: opinion
+    min_articles: 4
+    max_articles: 12
+    selectors:
+      item_link: ".Cat-lead-wrapper a[href*='/opinion/'], .Cat-list a[href*='/opinion/'], a[href*='/opinion/']"
+      url_pattern: "//bdnews24\\.com/opinion/[a-z0-9]{10}$"
+      title: "meta[property='og:title'], h1"
+      author: ".detail-author-name a, .detail-author-name span.author"
+      published_at: "meta[property='article:published_time'], time"
+      body: "div.details-brief p"
+    notes: "Separate English source (id: bdnews24-en); /rss.xml returns HTML so verified HTML selectors on bdnews24.com/opinion (allowed by robots.txt)."
+
+  # =====================================================================
+  # Additional Bangladeshi Newspapers from allbanglanewspaper.xyz (21)
+  # =====================================================================
+  - id: ajker-patrika
+    name_bn: "আজকের পত্রিকা"
+    name_en: "Ajker Patrika"
+    language: bn
+    enabled: true
+    logo: "assets/logos/ajker-patrika.svg"
+    website: "https://www.ajkerpatrika.com"
+    section_url: "https://www.ajkerpatrika.com/op-ed"
+    listing_urls:
+      - url: "https://www.ajkerpatrika.com/op-ed"
+        category: op-ed
+    fetch_method: html
+    parser: generic
+    default_category: op-ed
+    min_articles: 4
+    max_articles: 10
+    selectors:
+      item_link: "a[href*='/op-ed/']"
+      url_pattern: "/op-ed/[a-z\\-]+/[a-z0-9]+"
+      title: "meta[property='og:title'], h1"
+      author: "a[href*='/author/'], meta[name='author']"
+      published_at: "time, meta[property='article:published_time']"
+      body: "div.block-full_richtext p, article p"
+    notes: "Verified /op-ed (includes both editorial & columns) on ajkerpatrika.com."
+
+  - id: desh-rupantor
+    name_bn: "দেশ রূপান্তর"
+    name_en: "Desh Rupantor"
+    language: bn
+    enabled: true
+    logo: "assets/logos/desh-rupantor.svg"
+    website: "https://www.deshrupantor.com"
+    section_url: "https://www.deshrupantor.com/opinion"
+    rss_urls:
+      - url: "https://www.deshrupantor.com/feed/opinion"
+        category: opinion
+    fetch_method: rss
+    parser: generic
+    default_category: opinion
+    min_articles: 5
+    max_articles: 10
+    selectors:
+      author: "div.each_author a.name, div.author, meta[name='author']"
+      published_at: "meta[property='article:published_time'], time"
+      body: "div.jw_article_body p"
+    notes: "Official RSS feed /feed/opinion (চিন্তা/মতামত) verified."
+
+  - id: kalbela
+    name_bn: "কালবেলা"
+    name_en: "Kalbela"
+    language: bn
+    enabled: false
+    disabled_reason: "Blocked by Cloudflare anti-bot challenge (HTTP 403, cf-mitigated: challenge) across site and feeds."
+    logo: "assets/logos/kalbela.svg"
+    website: "https://www.kalbela.com"
+    section_url: "https://www.kalbela.com/opinion"
+    fetch_method: html
+    parser: generic
+    default_category: opinion
+    min_articles: 3
+    max_articles: 10
+    selectors:
+      item_link: "a[href*='/opinion/']"
+      body: "article p"
+
+  - id: bhorer-kagoj
+    name_bn: "ভোরের কাগজ"
+    name_en: "Bhorer Kagoj"
+    language: bn
+    enabled: true
+    logo: "assets/logos/bhorer-kagoj.svg"
+    website: "https://www.bhorerkagoj.net"
+    section_url: "https://www.bhorerkagoj.net/editorial"
+    listing_urls:
+      - url: "https://www.bhorerkagoj.net/editorial"
+        category: editorial
+      - url: "https://www.bhorerkagoj.net/thinking"
+        category: column
+    fetch_method: html
+    parser: generic
+    default_category: editorial
+    min_articles: 4
+    max_articles: 10
+    selectors:
+      item_link: "a.linkOverlay, a[href*='/editorial/'], a[href*='/thinking/']"
+      url_pattern: "/(editorial|tp-editorial|thinking)/\\d+"
+      title: "meta[property='og:title'], h1"
+      author: ".author-name, meta[name='author']"
+      published_at: "meta[property='article:published_time'], time"
+      body: "div.detailBody p"
+    notes: "bhorerkagoj.com redirects to bhorerkagoj.net; scrapes সম্পাদকীয় (/editorial) and মুক্তচিন্তা (/thinking)."
+
+  - id: daily-sangram
+    name_bn: "দৈনিক সংগ্রাম"
+    name_en: "The Daily Sangram"
+    language: bn
+    enabled: true
+    logo: "assets/logos/daily-sangram.svg"
+    website: "https://dailysangram.com"
+    section_url: "https://dailysangram.com/opinion/"
+    listing_urls:
+      - url: "https://dailysangram.com/opinion/"
+        category: column
+    fetch_method: html
+    parser: generic
+    default_category: column
+    min_articles: 4
+    max_articles: 10
+    selectors:
+      item_link: "a[href*='/opinion/column/'], a[href*='/opinion/editorial/']"
+      url_pattern: "/opinion/(column|editorial)/[A-Za-z0-9]+"
+      title: "meta[property='og:title'], h1"
+      author: "div.post-writer a, meta[name='author']"
+      published_at: "time.post-date, time"
+      body: "div.text-default-light p, article p"
+    notes: "Verified /opinion/ HTML selectors with columnist bylines and time.post-date."
+
+  - id: protidiner-sangbad
+    name_bn: "প্রতিদিনের সংবাদ"
+    name_en: "Protidiner Sangbad"
+    language: bn
+    enabled: true
+    logo: "assets/logos/protidiner-sangbad.svg"
+    website: "https://www.protidinersangbad.com"
+    section_url: "https://www.protidinersangbad.com/todays-newspaper/uposompadokio"
+    listing_urls:
+      - url: "https://www.protidinersangbad.com/todays-newspaper/uposompadokio"
+        category: op-ed
+      - url: "https://www.protidinersangbad.com/muktomot"
+        category: opinion
+    fetch_method: html
+    parser: generic
+    default_category: op-ed
+    min_articles: 4
+    max_articles: 10
+    selectors:
+      item_link: "a[href*='/uposompadokio/'], a[href*='/muktomot/']"
+      url_pattern: "/(todays-newspaper/uposompadokio|muktomot)/\\d+"
+      title: "meta[property='og:title'], h1"
+      author: ".author-name, meta[name='author']"
+      published_at: "meta[property='article:published_time'], time"
+      body: "div.dtl_section p"
+    notes: "Scrapes উপসম্পাদকীয় and মুক্তমত sections."
+
+  - id: amar-sangbad
+    name_bn: "আমার সংবাদ"
+    name_en: "Amar Sangbad"
+    language: bn
+    enabled: true
+    logo: "assets/logos/amar-sangbad.svg"
+    website: "https://www.amarsangbad.com"
+    section_url: "https://www.amarsangbad.com/opinion"
+    listing_urls:
+      - url: "https://www.amarsangbad.com/opinion"
+        category: opinion
+    fetch_method: html
+    parser: generic
+    default_category: opinion
+    min_articles: 4
+    max_articles: 10
+    selectors:
+      item_link: "a[href*='/opinion/news/']"
+      url_pattern: "/opinion/news/\\d+"
+      title: "meta[property='og:title'], h1"
+      author: ".author-name, meta[name='author']"
+      published_at: "meta[property='article:published_time'], time"
+      body: "article.content-details p"
+    notes: "Verified /opinion/news/ links and article.content-details p body."
+
+  - id: alokito-bangladesh
+    name_bn: "আলোকিত বাংলাদেশ"
+    name_en: "Alokito Bangladesh"
+    language: bn
+    enabled: true
+    logo: "assets/logos/alokito-bangladesh.svg"
+    website: "https://www.alokitobangladesh.com"
+    section_url: "https://www.alokitobangladesh.com/openion"
+    listing_urls:
+      - url: "https://www.alokitobangladesh.com/openion"
+        category: opinion
+    fetch_method: html
+    parser: generic
+    default_category: opinion
+    min_articles: 4
+    max_articles: 10
+    selectors:
+      item_link: ".lead_content a[href*='/openion/'], .content_list a[href*='/openion/'], a[href*='/openion/']"
+      url_pattern: "/openion/\\d+"
+      title: "meta[property='og:title'], h1"
+      author: ".author-name, meta[name='author']"
+      published_at: "meta[property='article:published_time'], time"
+      body: "div.dtl_content_block p"
+    notes: "Site spells opinion URL path as /openion; verified selectors."
+
+  - id: shomoyer-alo
+    name_bn: "সময়ের আলো"
+    name_en: "Shomoyer Alo"
+    language: bn
+    enabled: true
+    logo: "assets/logos/shomoyer-alo.svg"
+    website: "https://www.shomoyeralo.com"
+    section_url: "https://www.shomoyeralo.com/menu/295"
+    listing_urls:
+      - url: "https://www.shomoyeralo.com/menu/295"
+        category: opinion
+    fetch_method: html
+    parser: generic
+    default_category: opinion
+    min_articles: 3
+    max_articles: 10
+    selectors:
+      item_link: "div.title_lead a[href*='/news/'], div.title_body a[href*='/news/'], div.title_inner a[href*='/news/']"
+      url_pattern: "shomoyeralo\\.com/news/\\d+"
+      title: "meta[property='og:title'], h1"
+      author: ".writer, meta[name='author']"
+      published_at: "div.pub"
+      body: "div.mood"
+    notes: "Verified menu/295 (মতামত) and <br>-delimited div.mood body."
+
+  - id: dainik-bangla
+    name_bn: "দৈনিক বাংলা"
+    name_en: "Dainik Bangla"
+    language: bn
+    enabled: true
+    logo: "assets/logos/dainik-bangla.svg"
+    website: "https://www.dainikbangla.com.bd"
+    section_url: "https://www.dainikbangla.com.bd/opinion"
+    listing_urls:
+      - url: "https://www.dainikbangla.com.bd/opinion"
+        category: opinion
+    fetch_method: html
+    parser: generic
+    default_category: opinion
+    min_articles: 3
+    max_articles: 10
+    selectors:
+      item_link: "a[href*='/opinion/']"
+      url_pattern: "dainikbangla\\.com\\.bd/opinion/\\d+"
+      title: "meta[property='og:title'], h1"
+      author: ".author-name, meta[name='author']"
+      published_at: "meta[property='article:published_time'], time"
+      body: "div.news_body p"
+    notes: "Verified /opinion HTML selectors and div.news_body p."
+
+  - id: bangladesher-khabor
+    name_bn: "বাংলাদেশের খবর"
+    name_en: "Bangladesher Khabor"
+    language: bn
+    enabled: true
+    logo: "assets/logos/bangladesher-khabor.svg"
+    website: "https://www.bangladesherkhabor.net"
+    section_url: "https://www.bangladesherkhabor.net/opinion"
+    listing_urls:
+      - url: "https://www.bangladesherkhabor.net/opinion"
+        category: opinion
+    fetch_method: html
+    parser: generic
+    default_category: opinion
+    min_articles: 4
+    max_articles: 10
+    selectors:
+      item_link: "div.caption a[href*='/opinion/'], a[href*='/opinion/']"
+      url_pattern: "bangladesherkhabor\\.net/opinion/\\d+"
+      title: "meta[property='og:title'], h1"
+      author: ".author-name, meta[name='author']"
+      published_at: "meta[property='article:published_time'], time"
+      body: "div.detailBody p, article p, div p"
+    notes: "Verified /opinion section cards and article body."
+
+  - id: share-biz
+    name_bn: "শেয়ার বিজ"
+    name_en: "Share Biz"
+    language: bn
+    enabled: true
+    logo: "assets/logos/share-biz.svg"
+    website: "https://www.sharebiz.net"
+    section_url: "https://www.sharebiz.net/daily/editorial"
+    listing_urls:
+      - url: "https://www.sharebiz.net/daily/editorial"
+        category: editorial
+    fetch_method: html
+    parser: generic
+    default_category: editorial
+    min_articles: 4
+    max_articles: 10
+    selectors:
+      item_link: ".DCatTopNews a[href*='/daily/news/'], .DSubCategoryTopNewsList a[href*='/daily/news/']"
+      url_pattern: "sharebiz\\.net/daily/news/\\d+"
+      title: "meta[property='og:title'], h1"
+      author: "div.writter, meta[name='author']"
+      published_at: "meta[property='article:published_time'], time"
+      body: "div.dcontent-details p"
+    notes: "Verified /daily/editorial selectors with div.writter author and div.dcontent-details p."
+
+  - id: suprobhat
+    name_bn: "সুপ্রভাত বাংলাদেশ"
+    name_en: "Suprobhat Bangladesh"
+    language: bn
+    enabled: true
+    logo: "assets/logos/suprobhat.svg"
+    website: "https://suprobhat.com"
+    section_url: "https://suprobhat.com/category/opinion/"
+    rss_urls:
+      - url: "https://suprobhat.com/category/opinion/feed/"
+        category: opinion
+      - url: "https://suprobhat.com/category/opinion/editorial/feed/"
+        category: editorial
+    fetch_method: rss
+    parser: generic
+    default_category: opinion
+    min_articles: 4
+    max_articles: 10
+    selectors:
+      author: "meta[name='author'], .author-name"
+      published_at: "meta[property='article:published_time'], time"
+      body: "div.entry-content p"
+    notes: "Official WordPress RSS feeds for মতামত and সম্পাদকীয়."
+
+  - id: banglanews24
+    name_bn: "বাংলানিউজ২৪"
+    name_en: "banglanews24.com"
+    language: bn
+    enabled: true
+    logo: "assets/logos/banglanews24.svg"
+    website: "https://www.banglanews24.com"
+    section_url: "https://www.banglanews24.com/category/opinion"
+    listing_urls:
+      - url: "https://www.banglanews24.com/category/opinion"
+        category: opinion
+    fetch_method: html
+    parser: generic
+    default_category: opinion
+    min_articles: 4
+    max_articles: 10
+    selectors:
+      item_link: "a[href*='/opinion/news/bd/']"
+      url_pattern: "/opinion/news/bd/\\d+\\.details"
+      title: "meta[property='og:title'], h1"
+      author: ".author-name, meta[name='author']"
+      published_at: "meta[property='article:published_time'], time.text-black-50"
+      body: "article p, article"
+    notes: "Verified /category/opinion (মুক্তমত) stretched-link cards."
+
+  - id: risingbd
+    name_bn: "রাইজিংবিডি"
+    name_en: "RisingBD"
+    language: bn
+    enabled: false
+    disabled_reason: "Blocked by Cloudflare anti-bot challenge (HTTP 403, cf-mitigated: challenge)."
+    logo: "assets/logos/risingbd.svg"
+    website: "https://www.risingbd.com"
+    section_url: "https://www.risingbd.com/opinion"
+    fetch_method: html
+    parser: generic
+    default_category: opinion
+    min_articles: 3
+    max_articles: 10
+    selectors:
+      item_link: "a[href*='/opinion/']"
+      body: "article p"
+
+  - id: sarabangla
+    name_bn: "সারাবাংলা"
+    name_en: "SaraBangla"
+    language: bn
+    enabled: true
+    logo: "assets/logos/sarabangla.svg"
+    website: "https://sarabangla.net"
+    section_url: "https://sarabangla.net/opinion/"
+    rss_urls:
+      - url: "https://sarabangla.net/opinion/feed/"
+        category: opinion
+      - url: "https://sarabangla.net/free-opinion/feed/"
+        category: column
+    fetch_method: rss
+    parser: generic
+    default_category: opinion
+    min_articles: 4
+    max_articles: 10
+    selectors:
+      author: "meta[name='author'], .author-name"
+      published_at: "meta[property='article:published_time'], time"
+      body: "div.sb-single-post-content p"
+    notes: "Official WordPress RSS feeds for মত-দ্বিমত and মুক্তমত."
+
+  - id: daily-bangladesh
+    name_bn: "ডেইলি বাংলাদেশ"
+    name_en: "Daily Bangladesh"
+    language: bn
+    enabled: true
+    logo: "assets/logos/daily-bangladesh.svg"
+    website: "https://www.daily-bangladesh.com"
+    section_url: "https://www.daily-bangladesh.com/opinion"
+    listing_urls:
+      - url: "https://www.daily-bangladesh.com/opinion"
+        category: opinion
+    fetch_method: html
+    parser: generic
+    default_category: opinion
+    min_articles: 4
+    max_articles: 10
+    selectors:
+      item_link: "a[href*='/opinion/'], a[href*='/views/']"
+      url_pattern: "daily-bangladesh\\.com/(opinion|views)/\\d+"
+      title: "meta[property='og:title'], h1"
+      author: "meta[name='author']"
+      published_at: "meta[property='article:published_time'], time"
+      body: "div.details-body p"
+    notes: "Scrapes মতামত (/opinion) and ভিউস (/views) with author metadata and div.details-body p."
+
+  - id: bartabazar
+    name_bn: "বার্তাবাজার"
+    name_en: "BartaBazar"
+    language: bn
+    enabled: true
+    logo: "assets/logos/bartabazar.svg"
+    website: "https://bartabazar.com"
+    section_url: "https://bartabazar.com/news/category/%e0%a6%ae%e0%a6%a4%e0%a6%be%e0%a6%ae%e0%a6%a4/"
+    rss_urls:
+      - url: "https://bartabazar.com/news/category/%e0%a6%ae%e0%a6%a4%e0%a6%be%e0%a6%ae%e0%a6%a4/feed/"
+        category: opinion
+    fetch_method: rss
+    parser: generic
+    default_category: opinion
+    min_articles: 4
+    max_articles: 10
+    selectors:
+      author: "meta[name='author'], .author-name"
+      published_at: "meta[property='article:published_time'], time"
+      body: "div.post-content p"
+    notes: "Official মতামত RSS feed verified."
+
+  - id: dainik-azadi
+    name_bn: "দৈনিক আজাদী"
+    name_en: "Dainik Azadi"
+    language: bn
+    enabled: true
+    logo: "assets/logos/dainik-azadi.svg"
+    website: "https://dainikazadi.net"
+    section_url: "https://dainikazadi.net/category/today-newspaper/editorial/"
+    rss_urls:
+      - url: "https://dainikazadi.net/category/today-newspaper/editorial/feed/"
+        category: editorial
+    fetch_method: rss
+    parser: generic
+    default_category: editorial
+    min_articles: 4
+    max_articles: 10
+    selectors:
+      author: ".td-post-author-name a"
+      published_at: "meta[property='article:published_time'], time"
+      body: "div.td-post-content p"
+    notes: "Official সম্পাদকীয় RSS feed from Chattogram's oldest daily."
+
+  - id: karatoa
+    name_bn: "দৈনিক করতোয়া"
+    name_en: "Dainik Karatoa"
+    language: bn
+    enabled: true
+    logo: "assets/logos/karatoa.svg"
+    website: "https://www.karatoa.com.bd"
+    section_url: "https://www.karatoa.com.bd/category/editorial"
+    listing_urls:
+      - url: "https://www.karatoa.com.bd/category/editorial"
+        category: op-ed
+    fetch_method: html
+    parser: generic
+    default_category: op-ed
+    min_articles: 4
+    max_articles: 10
+    selectors:
+      item_link: "a[href*='/article/']"
+      url_pattern: "karatoa\\.com\\.bd/article/\\d+"
+      title: "meta[property='og:title'], h1"
+      author: ".author-name, meta[name='author']"
+      published_at: "meta[property='article:published_time'], time"
+      body: "div.dtl_content_section p"
+    notes: "Verified উপ-সম্পাদকীয় (/category/editorial) HTML selectors."
+
+  - id: bangladesh-post
+    name_bn: "বাংলাদেশ পোস্ট"
+    name_en: "Bangladesh Post"
+    language: en
+    enabled: true
+    logo: "assets/logos/bangladesh-post.svg"
+    website: "https://bangladeshpost.net"
+    section_url: "https://bangladeshpost.net/categories/editorial"
+    listing_urls:
+      - url: "https://bangladeshpost.net/categories/editorial"
+        category: editorial
+      - url: "https://bangladeshpost.net/categories/opinion"
+        category: opinion
+    fetch_method: html
+    parser: generic
+    default_category: opinion
+    min_articles: 4
+    max_articles: 10
+    selectors:
+      item_link: "div.box-body a[href*='/posts/'], a[href*='/posts/']"
+      url_pattern: "bangladeshpost\\.net/posts/[a-z0-9\\-]+-\\d+$"
+      title: "meta[property='og:title'], h1"
+      author: ".post-author a, meta[name='author']"
+      published_at: "meta[property='article:published_time'], time"
+      body: "div.post-details-content p, div.post-details-content"
+    notes: "English national daily; scrapes Editorial & Opinion categories."

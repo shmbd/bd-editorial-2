@@ -1,0 +1,94 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      remote_data_url:
+        description: "Optional custom live data URL (leave blank to auto-use GitHub Pages URL)"
+        required: false
+        default: ""
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "21"
+          cache: "gradle"
+
+      - name: Install Capacitor dependencies
+        run: npm install
+
+      - name: Assemble web bundle with live GitHub Pages sync URL
+        env:
+          INPUT_URL: ${{ inputs.remote_data_url }}
+          OWNER: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.event.repository.name }}
+        run: |
+          if [ -n "$INPUT_URL" ]; then
+            export REMOTE_DATA_URL="$INPUT_URL"
+          else
+            export REMOTE_DATA_URL="https://${OWNER}.github.io/${REPO_NAME}/data"
+          fi
+          echo "Using REMOTE_DATA_URL=$REMOTE_DATA_URL"
+          python scripts/prepare_apk_www.py
+
+      - name: Generate & sync Capacitor Android project
+        run: |
+          if [ ! -d "android" ]; then
+            npx cap add android
+          fi
+          npx cap sync android
+
+      - name: Apply custom app launcher icons
+        run: |
+          for dir in android/app/src/main/res/mipmap-*; do
+            if [ -d "$dir" ]; then
+              cp web/assets/icon-512.png "$dir/ic_launcher.png" || true
+              cp web/assets/icon-512.png "$dir/ic_launcher_round.png" || true
+              cp web/assets/icon-512.png "$dir/ic_launcher_foreground.png" || true
+            fi
+          done
+
+      - name: Build installable APK with Gradle
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+          cp app/build/outputs/apk/debug/app-debug.apk ../bd-editorials.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bd-editorials-apk
+          path: bd-editorials.apk
+          if-no-files-found: error
+
+      - name: Attach APK to GitHub Release (when pushed with v* tag)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: bd-editorials.apk
+          generate_release_notes: true

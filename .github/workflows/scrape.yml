@@ -1,0 +1,107 @@
+name: Scrape & Update Editorials
+
+on:
+  schedule:
+    # প্রতি ৩ ঘণ্টায় চলবে (Runs every 3 hours)
+    - cron: "0 */3 * * *"
+  workflow_dispatch:
+    inputs:
+      sources:
+        description: "Optional comma-separated source IDs (leave blank for all enabled)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+  issues: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "scrape-and-deploy"
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    outputs:
+      data_changed: ${{ steps.commit_changes.outputs.changed }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11 with pip cache
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: "requirements.txt"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run unit tests
+        run: pytest -q
+
+      - name: Run scraper, summarizer, and 90-day archiver
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          SITE_URL: "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+        run: |
+          if [ -n "${{ inputs.sources }}" ]; then
+            python -m scraper.main --sources "${{ inputs.sources }}" --sync-github-issues
+          else
+            python -m scraper.main --sync-github-issues
+          fi
+
+      - name: Commit and push if data changed
+        id: commit_changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/ web/feed.xml
+          if git diff --staged --quiet; then
+            echo "No data changes detected."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "chore(data): update aggregated editorials [$(date -u +'%Y-%m-%dT%H:%M:%SZ')]"
+            git push
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  redeploy_pages:
+    needs: scrape
+    if: needs.scrape.outputs.data_changed == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout updated repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Assemble static site bundle
+        run: |
+          mkdir -p _site
+          cp -r web/* _site/
+          cp -r data _site/data
+          touch _site/.nojekyll
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "_site"
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

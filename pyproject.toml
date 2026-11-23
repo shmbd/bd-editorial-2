@@ -1,0 +1,9 @@
+[project]
+name = "bd-editorials"
+version = "0.1.0"
+description = "Ethical aggregator of Bangladeshi newspaper editorials, columns, and op-eds"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["scraper/tests"]

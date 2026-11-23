@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="bn" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>মতামত ও সম্পাদকীয় সংগ্রহ | BD Editorials</title>
+  <meta name="description" content="বাংলাদেশের প্রধান অনলাইন পত্রিকাগুলোর সম্পাদকীয়, উপ-সম্পাদকীয়, কলাম ও মতামতের একক সূচি ও সংক্ষিপ্ত পাঠক মোড।" />
+  <meta name="theme-color" content="#16302b" />
+  <link rel="icon" type="image/svg+xml" href="assets/icon.svg" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="alternate" type="application/rss+xml" title="BD Editorials RSS Feed" href="feed.xml" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Noto+Serif+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js" defer></script>
+  <script src="js/app.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="#/" class="brand" id="brand-home-link">
+        <img src="assets/icon.svg" alt="" class="brand-logo" width="38" height="38" />
+        <div>
+          <span class="brand-title">মতামত ও সম্পাদকীয়</span>
+          <span class="brand-subtitle">বাংলাদেশের পত্রিকার কলাম ও মতামত সূচি</span>
+        </div>
+      </a>
+
+      <div class="header-actions">
+        <button type="button" id="numeral-toggle" class="chip-btn" title="বাংলা ও ইংরেজি সংখ্যার মধ্যে পরিবর্তন করুন">
+          সংখ্যা: বাংলা
+        </button>
+        <a href="feed.xml" target="_blank" rel="noopener" class="chip-btn" title="RSS Feed">
+          RSS
+        </a>
+        <button type="button" id="theme-toggle" class="icon-btn" aria-label="থিম পরিবর্তন করুন" title="ডার্ক / লাইট মোড">
+          <span id="theme-icon" aria-hidden="true">☾</span>
+        </button>
+      </div>
+    </div>
+
+    <nav class="primary-nav" aria-label="প্রধান বিভাগ">
+      <div class="container nav-tabs">
+        <button type="button" class="nav-tab active" data-view="feed">সর্বশেষ ফিড</button>
+        <button type="button" class="nav-tab" data-view="editorials">আজকের সম্পাদকীয়</button>
+        <button type="button" class="nav-tab" data-view="authors">লেখকবৃন্দ</button>
+        <button type="button" class="nav-tab" data-view="bookmarks">
+          পরে পড়ব <span id="bookmark-count" class="count-pill">০</span>
+        </button>
+        <button type="button" class="nav-tab" data-view="health">সোর্স স্ট্যাটাস</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main-content">
+    <!-- Search & Filter Controls -->
+    <section id="controls-panel" class="controls-panel" aria-label="সার্চ ও ফিল্টার">
+      <div class="search-row">
+        <div class="search-input-wrap">
+          <span class="search-icon" aria-hidden="true">⌕</span>
+          <input
+            type="search"
+            id="search-input"
+            placeholder="শিরোনাম, লেখক বা বিষয় দিয়ে খুঁজুন..."
+            autocomplete="off"
+            aria-label="শিরোনাম, লেখক বা সারাংশে খুঁজুন"
+          />
+          <button type="button" id="clear-search-btn" class="clear-input-btn hidden" aria-label="সার্চ মুছুন">✕</button>
+        </div>
+
+        <div class="quick-selects">
+          <select id="language-filter" aria-label="ভাষা ফিল্টার">
+            <option value="all">সব ভাষা (বাংলা + EN)</option>
+            <option value="bn">বাংলা</option>
+            <option value="en">English</option>
+          </select>
+
+          <select id="date-filter" aria-label="তারিখের পরিসর">
+            <option value="all">সব তারিখ</option>
+            <option value="today">আজ</option>
+            <option value="7d">গত ৭ দিন</option>
+            <option value="30d">গত ৩০ দিন</option>
+            <option value="custom">কাস্টম তারিখ...</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="custom-date-row" class="custom-date-row hidden">
+        <label>শুরু: <input type="date" id="date-from" /></label>
+        <label>শেষ: <input type="date" id="date-to" /></label>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">ধরন:</span>
+        <div class="pill-row" id="category-pills">
+          <button type="button" class="filter-pill active" data-category="all">সব</button>
+          <button type="button" class="filter-pill" data-category="editorial">সম্পাদকীয়</button>
+          <button type="button" class="filter-pill" data-category="op-ed">উপ-সম্পাদকীয়</button>
+          <button type="button" class="filter-pill" data-category="column">কলাম</button>
+          <button type="button" class="filter-pill" data-category="opinion">মতামত</button>
+          <button type="button" class="filter-pill" data-category="analysis">বিশ্লেষণ</button>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">পত্রিকা:</span>
+        <div class="source-filter-wrap">
+          <div class="pill-row" id="source-pills">
+            <!-- Populated dynamically from sources.json -->
+          </div>
+          <button type="button" id="toggle-all-sources-btn" class="text-link-btn source-expand-btn hidden">
+            সব পত্রিকা দেখুন ▾
+          </button>
+        </div>
+      </div>
+
+      <!-- Active Author Profile Header (Author Page View) -->
+      <div id="author-banner" class="author-banner hidden">
+        <div class="author-profile-main">
+          <div id="author-avatar" class="author-avatar" aria-hidden="true">লে</div>
+          <div>
+            <span class="author-banner-kicker">লেখক প্রোফাইল ও সংগৃহীত কলাম</span>
+            <h2 id="author-banner-name"></h2>
+            <p id="author-banner-meta" class="author-banner-meta"></p>
+          </div>
+        </div>
+        <div class="author-banner-actions">
+          <button type="button" id="all-authors-btn" class="secondary-btn">সকল লেখক</button>
+          <button type="button" id="clear-author-btn" class="secondary-btn">সব লেখায় ফিরুন ✕</button>
+        </div>
+      </div>
+
+      <div class="status-bar">
+        <span id="results-summary">লোড হচ্ছে...</span>
+        <button type="button" id="reset-filters-btn" class="text-link-btn hidden">সব ফিল্টার রিসেট করুন</button>
+      </div>
+    </section>
+
+    <!-- Today's Editorials Section Header -->
+    <section id="editorials-intro" class="section-intro hidden">
+      <h1>আজকের সম্পাদকীয়</h1>
+      <p>বিভিন্ন পত্রিকার সর্বশেষ সম্পাদকীয় পাশাপাশি পড়ুন এবং মূল সাইটে গিয়ে পূর্ণ নিবন্ধ দেখুন।</p>
+    </section>
+
+    <!-- Bookmarks Intro -->
+    <section id="bookmarks-intro" class="section-intro hidden">
+      <h1>পরে পড়ব (বুকমার্ক)</h1>
+      <p>আপনার ব্রাউজারে সংরক্ষিত লেখাগুলো এখানে অফলাইনেও পাওয়া যাবে।</p>
+    </section>
+
+    <!-- Authors Directory Section -->
+    <section id="authors-section" class="authors-section hidden" aria-label="লেখক তালিকা">
+      <div class="section-intro authors-header-row">
+        <div>
+          <h1>লেখক ও কলামিস্ট ডিরেক্টরি</h1>
+          <p id="authors-total-label">সংগৃহীত কলাম ও মতামতের লেখকদের তালিকা। নামের ওপর ক্লিক করে লেখকের সব লেখা দেখুন।</p>
+        </div>
+        <input
+          type="search"
+          id="author-search-input"
+          class="author-search-input"
+          placeholder="লেখকের নাম খুঁজুন..."
+          aria-label="লেখকের নাম খুঁজুন"
+        />
+      </div>
+      <div id="authors-grid" class="authors-grid"></div>
+    </section>
+
+    <!-- Feed Grid -->
+    <section id="articles-grid" class="articles-grid" aria-live="polite"></section>
+
+    <!-- Infinite Scroll / Load More -->
+    <div id="load-more-wrap" class="load-more-wrap hidden">
+      <button type="button" id="load-more-btn" class="secondary-btn">আরও লেখা লোড করুন</button>
+    </div>
+    <div id="scroll-sentinel" class="scroll-sentinel" aria-hidden="true"></div>
+
+    <!-- Source Health Dashboard -->
+    <section id="health-section" class="health-section hidden" aria-label="সোর্স হেলথ ড্যাশবোর্ড">
+      <div class="section-intro">
+        <h1>সোর্স স্ট্যাটাস ও নির্ভরযোগ্যতা</h1>
+        <p id="health-updated-at"></p>
+      </div>
+      <div id="health-grid" class="health-grid"></div>
+    </section>
+  </main>
+
+  <!-- Reader Mode Backdrop & Slide-Over Sheet -->
+  <div id="reader-backdrop" class="reader-backdrop hidden" aria-hidden="true"></div>
+  <aside
+    id="reader-sheet"
+    class="reader-sheet hidden"
+    data-reader-theme="light"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="reader-title"
+  >
+    <div class="reader-toolbar">
+      <button type="button" id="reader-close-btn" class="icon-btn" aria-label="পাঠক মোড বন্ধ করুন (Esc)">
+        ✕ <span class="hide-xs">বন্ধ</span>
+      </button>
+
+      <div class="reader-controls" aria-label="পাঠক মোড কাস্টমাইজেশন">
+        <div class="font-controls" role="group" aria-label="ফন্টের আকার">
+          <button type="button" id="font-dec-btn" class="tool-pill" title="ফন্ট ছোট করুন">A−</button>
+          <button type="button" id="font-inc-btn" class="tool-pill" title="ফন্ট বড় করুন">A+</button>
+        </div>
+
+        <div class="theme-dots" role="group" aria-label="পাঠক মোড থিম">
+          <button type="button" class="theme-dot active" data-rtheme="light" title="Light">আলো</button>
+          <button type="button" class="theme-dot" data-rtheme="sepia" title="Sepia">সেপিয়া</button>
+          <button type="button" class="theme-dot" data-rtheme="dark" title="Dark">রাত</button>
+        </div>
+
+        <button type="button" id="reader-bookmark-btn" class="tool-pill" title="বুকমার্ক করুন">☆</button>
+        <button type="button" id="reader-share-btn" class="tool-pill" title="লিংক শেয়ার বা কপি করুন">শেয়ার</button>
+      </div>
+    </div>
+
+    <article class="reader-body" id="reader-scroll-container">
+      <div class="reader-meta-top">
+        <a id="reader-source-badge" class="source-chip" href="#" target="_blank" rel="noopener noreferrer"></a>
+        <span id="reader-category-badge" class="category-badge"></span>
+      </div>
+
+      <h1 id="reader-title" class="reader-title"></h1>
+
+      <div class="reader-byline">
+        <button type="button" id="reader-author-btn" class="author-link-btn"></button>
+        <span class="dot-sep">•</span>
+        <time id="reader-time"></time>
+        <span class="dot-sep" id="reader-readtime-sep">•</span>
+        <span id="reader-readtime"></span>
+      </div>
+
+      <div class="reader-summary-box">
+        <div class="summary-kicker">
+          <span>পাঠক মোড সারাংশ</span>
+          <span id="reader-summary-method" class="method-tag"></span>
+        </div>
+        <p id="reader-summary-text" class="reader-summary-text"></p>
+      </div>
+
+      <div id="reader-tags-row" class="reader-tags-row hidden" aria-label="বিষয়বস্তু ট্যাগ"></div>
+
+      <p class="reader-ethics-note">
+        পাঠক মোডে শুধুমাত্র লেখার সংক্ষিপ্ত সারাংশ দেখানো হচ্ছে। লেখকের সম্পূর্ণ বিশ্লেষণ ও পূর্ণ নিবন্ধ পড়তে নিচের বাটনে ক্লিক করে মূল পত্রিকার সাইটে যান।
+      </p>
+
+      <a
+        id="reader-original-link"
+        href="#"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="primary-cta-btn"
+      >
+        পূর্ণ লেখা মূল সাইটে পড়ুন →
+      </a>
+    </article>
+
+    <footer class="reader-footer-nav">
+      <button type="button" id="reader-prev-btn" class="nav-arrow-btn">← আগের লেখা</button>
+      <span id="reader-pos-indicator" class="reader-pos"></span>
+      <button type="button" id="reader-next-btn" class="nav-arrow-btn">পরের লেখা →</button>
+    </footer>
+  </aside>
+
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p class="disclaimer-text">
+        <strong>স্বত্ব ও দায়মুক্তি:</strong> এই সাইট কোনো লেখার মালিক নয়; সব স্বত্ব সংশ্লিষ্ট পত্রিকার। এখানে কেবল শিরোনাম, লেখক, সংক্ষিপ্ত সারাংশ (সর্বোচ্চ ১২০ শব্দ) ও মূল লেখার লিংক প্রদর্শন করা হয়; কোনো পূর্ণ লেখা সংরক্ষণ করা হয় না।
+      </p>
+      <div class="footer-links">
+        <a href="feed.xml" target="_blank" rel="noopener">RSS ফীড</a>
+        <span>•</span>
+        <a href="#/health" id="footer-health-link">সোর্স হেলথ</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
