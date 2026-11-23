@@ -487,7 +487,7 @@ def main() -> None:
     parser.add_argument("--web-dir", default=str(ROOT_DIR / "web"), help="Path to web directory")
     parser.add_argument("--sources", default="", help="Comma-separated source IDs to run")
     parser.add_argument("--max-per-source", type=int, default=None, help="Override max_articles per source")
-    parser.add_argument("--site-url", default=os.getenv("SITE_URL", "https://bd-editorials.github.io/"))
+    parser.add_argument("--site-url", default=os.getenv("SITE_URL", "https://shmbd.github.io/bd-editorial-2/"))
     parser.add_argument("--sync-github-issues", action="store_true", help="Open GitHub issue after 3 consecutive failures")
     args = parser.parse_args()
 
